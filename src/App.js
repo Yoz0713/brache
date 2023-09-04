@@ -1,51 +1,97 @@
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
 import Team from "./scenes/team";
 import Invoices from "./scenes/invoices";
 import Contacts from "./scenes/contacts";
-import Bar from "./scenes/bar";
 import Form from "./scenes/form";
-import Line from "./scenes/line";
-import Pie from "./scenes/pie";
 import FAQ from "./scenes/faq";
-import Geography from "./scenes/geography";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import Calendar from "./scenes/calendar/calendar";
-
+import ModuleManage from "./scenes/module-manage";
+import Snackbar from '@mui/material/Snackbar';
+import Alert from "@mui/material/Alert";
+import { useSelector, useDispatch } from "react-redux";
+import { snackBarOpenAction } from "./redux/action";
+import { SystemArchitecture } from "./scenes/system-architecture";
+import Authority from "./scenes/authority";
+import AdminManagement from "./scenes/admin";
+import Login from "./scenes/login";
+import StudentDataList from "./scenes/student";
+import TeacherDataList from "./scenes/teacher";
+import ClassroomCalendar from "./scenes/calendar";
+import SignInSheet from "./scenes/signin-sheet";
+import ClassRecord from "./scenes/class-record";
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
-
+  const snackbarOpen = useSelector(state => state.snackbarOpenReducer)
+  const dispatch = useDispatch(null)
+  const handleClose = () => {
+    dispatch(snackBarOpenAction(false));
+  };
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <div className="app">
-          <Sidebar isSidebar={isSidebar} />
-          <main className="content">
-            <Topbar setIsSidebar={setIsSidebar} />
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/team" element={<Team />} />
-              <Route path="/contacts" element={<Contacts />} />
-              <Route path="/invoices" element={<Invoices />} />
-              <Route path="/form" element={<Form />} />
-              <Route path="/bar" element={<Bar />} />
-              <Route path="/pie" element={<Pie />} />
-              <Route path="/line" element={<Line />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/geography" element={<Geography />} />
-            </Routes>
-          </main>
-        </div>
+
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="*" element={<Main setIsSidebar={setIsSidebar} isSidebar={isSidebar} />} />
+        </Routes>
+
+
+
+        <Snackbar open={snackbarOpen.flag} autoHideDuration={2000} onClose={handleClose} sx={{
+          top: "3vh !important",
+          bottom: "auto !important",
+          left: "0 !important",
+          right: "0 !important",
+          margin: "auto",
+          height: "70px",
+          width: "95%",
+        }}>
+          <Alert severity={snackbarOpen.severity} sx={{ width: '100%' }}>
+            {snackbarOpen.message}
+          </Alert>
+        </Snackbar>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );
+}
+
+const Main = ({ isSidebar, setIsSidebar }) => {
+  return (
+    <div className="app" >
+      <Sidebar isSidebar={isSidebar} />
+      <main className="content" style={{ position: "relative" }}>
+        <Topbar setIsSidebar={setIsSidebar} />
+        <Routes>
+
+          <Route path="/team" element={<Team />} />
+          <Route path="/contacts" element={<Contacts />} />
+          <Route path="/invoices" element={<Invoices />} />
+          <Route path="/form" element={<Form />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/calendar/*" element={<ClassroomCalendar />} />
+          <Route path="/signin-sheet/*" element={<SignInSheet />} />
+          {/* 正式 */}
+          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+          <Route path="/student" element={<StudentDataList />} />
+          <Route path="/teacher" element={<TeacherDataList />} />
+          <Route path="/module-manage" element={<ModuleManage />} />
+          <Route path="/system-architecture" element={<SystemArchitecture />} />
+          <Route path="/authority" element={<Authority />} />
+          <Route path="/admin-management" element={<AdminManagement />} />
+          <Route path="/class-record" element={<ClassRecord />} />
+          <Route path="*" element={<h1 style={{ width: "100%", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>此功能尚未製作完成</h1>} />
+        </Routes>
+      </main>
+    </div>
+  )
 }
 
 export default App;

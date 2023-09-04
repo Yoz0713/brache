@@ -1,14 +1,23 @@
-import React from "react";
+import React from 'react';
+import { Provider } from "react-redux"; // 1.
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter as Router } from "react-router-dom";
+import { store } from "./redux/store";
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
+
+
+  <DndProvider backend={HTML5Backend}>
+    <Provider store={store}>  { /* 將store作為props傳遞給其他component */}
+      <Router basename='/'>
+        <App />
+      </Router>
+    </Provider>
+  </DndProvider>
+
 );

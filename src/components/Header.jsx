@@ -1,9 +1,10 @@
 import { Typography, Box, useTheme } from "@mui/material";
 import { tokens } from "../theme";
 
-const Header = ({ title, subtitle }) => {
+const Header = ({ title, subtitle, warm = false }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  subtitle = subtitle.split("\n")
   return (
     <Box mb="30px">
       <Typography
@@ -14,9 +15,15 @@ const Header = ({ title, subtitle }) => {
       >
         {title}
       </Typography>
-      <Typography variant="h5" color={colors.greenAccent[400]}>
-        {subtitle}
-      </Typography>
+      {typeof subtitle === "object" &&
+        subtitle.map((item, i) => {
+          return (
+            <Typography variant="h5" sx={{ display: "block", lineHeight: "1.5" }} color={warm ? "red" : colors.greenAccent[400]} key={i}>
+              {item}
+            </Typography>
+          )
+        })
+      }
     </Box>
   );
 };

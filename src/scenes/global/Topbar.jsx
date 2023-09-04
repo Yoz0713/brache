@@ -1,4 +1,4 @@
-import { Box, IconButton, useTheme } from "@mui/material";
+import { Box, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import { useContext } from "react";
 import { ColorModeContext, tokens } from "../../theme";
 import InputBase from "@mui/material/InputBase";
@@ -6,18 +6,37 @@ import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-
+import MenuIcon from '@mui/icons-material/Menu';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useDispatch, useSelector } from "react-redux";
+import { menuInAction, clearReduxStateAction } from "../../redux/action";
+import { useNavigate } from "react-router-dom";
+import { Qrcode } from "../teacher";
 const Topbar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+  const isMobile = useMediaQuery('(max-width:1000px)'); // 媒体查询判断是否为手机屏幕
+  const dispatch = useDispatch(null)
+  const navigate = useNavigate()
+  const userData = useSelector(state => state.accessRangeReducer)
 
   return (
-    <Box display="flex" justifyContent="space-between" p={2}>
+    <Box display="flex" justifyContent={isMobile ? "space-between" : "flex-end"} alignItems={"center"} p={2}>
+      {/* menu hamburger */}
+      <MenuIcon sx={
+        {
+          display: "none",
+          width: "30px",
+          height: "30px",
+          "@media all and (max-width:850px)": {
+            display: "block"
+          }
+        }
+      } onClick={() => dispatch(menuInAction(true))} />
       {/* SEARCH BAR */}
-      <Box
+      {/* <Box
         display="flex"
         backgroundColor={colors.primary[400]}
         borderRadius="3px"
@@ -26,11 +45,11 @@ const Topbar = () => {
         <IconButton type="button" sx={{ p: 1 }}>
           <SearchIcon />
         </IconButton>
-      </Box>
+      </Box> */}
 
       {/* ICONS */}
       <Box display="flex">
-        <IconButton onClick={colorMode.toggleColorMode}>
+        {/* <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? (
             <DarkModeOutlinedIcon />
           ) : (
@@ -39,13 +58,23 @@ const Topbar = () => {
         </IconButton>
         <IconButton>
           <NotificationsOutlinedIcon />
-        </IconButton>
-        <IconButton>
+        </IconButton> */}
+        {/* <IconButton>
           <SettingsOutlinedIcon />
-        </IconButton>
-        <IconButton>
-          <PersonOutlinedIcon />
-        </IconButton>
+        </IconButton> */}
+        <Box display={"flex"} alignItems={"center"} gap={"7px"}>
+          {userData?.inform?.Tb_index && <Qrcode value={userData.inform.Tb_index} />}
+          <IconButton onClick={() => {
+            if (window.confirm("確認登出系統?")) {
+              window.localStorage.removeItem("refresh_jwt")
+              window.sessionStorage.removeItem("jwt")
+              dispatch(clearReduxStateAction())
+              navigate("/")
+            }
+          }}>
+            <LogoutIcon />
+          </IconButton>
+        </Box>
       </Box>
     </Box>
   );

@@ -1281,3 +1281,14 @@ export const mockGeographyData = [
     value: 171135,
   },
 ];
+
+
+export const mockModuleManage = [
+  {
+    id: 1,
+    name: "權限管理",
+    status: true,
+    file: 35,
+  },
+
+];
