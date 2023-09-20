@@ -71,3 +71,27 @@ export const updateOne = (data, func) => {
 
 
 
+export const get_student_course_history_one = async (datas) => {
+    try {
+        const response = await axiosInstance({
+            method: "POST",
+            url: "https://bratsche.web-board.tw/ajax/course_history.php",
+            data: {
+                type: "get_student_course_history_one",
+                ...datas
+            }
+        });
+
+        let data = response.data;
+        data.data = data.data.map((item, i) => {
+            const updatedItem = {
+                ...item,
+                index: i,
+            };
+            return updatedItem;
+        });
+        return data
+    } catch (error) {
+        console.error(error);
+    }
+};

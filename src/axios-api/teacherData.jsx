@@ -19,7 +19,8 @@ export const getAll = async () => {
                 name: item.name,
                 s_sex: item.s_sex === "1" ? "男" : "女",
                 index: i,
-                t_skill: item.t_skill
+                t_skill: item.t_skill,
+                t_color:item.t_color
             };
             return updatedItem;
         });

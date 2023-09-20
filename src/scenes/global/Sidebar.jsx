@@ -106,7 +106,9 @@ const Sidebar = () => {
   const adminData = useSelector(state => state.accessRangeReducer)
   const dispatch = useDispatch(null)
   const navigate = useNavigate(null)
-
+  useEffect(()=>{
+    console.log(adminData)
+  },[adminData])
 
   //登入後儲存系統架構資料到Redux以及登入者姓名及id
   const userDataStored = () => {
@@ -151,7 +153,7 @@ const Sidebar = () => {
         };
 
         const treeData = buildTree(res.data.data.permissions, "");
-
+    
         dispatch(adminAction(treeData, {
           name: res.data.data.Group_name,
           access: res.data.data.name,
@@ -177,14 +179,17 @@ const Sidebar = () => {
   return (
     <Box
       sx={{
-
+        position:"fixed",
+        left:"0",
+        top:"0",
+        height: "100%",
+        zIndex: 900,
         "@media all and (max-width:850px)": {
           position: "fixed",
           left: `${menuIn ? "0" : "-80%"}`,
           top: "0",
-          zIndex: 100,
           transition: "0.65s",
-          height: "100vh",
+          height: "100%",
         },
         "& .pro-sidebar-layout::-webkit-scrollbar": {
           width: "5px"

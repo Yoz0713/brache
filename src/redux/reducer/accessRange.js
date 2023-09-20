@@ -1,4 +1,4 @@
-import { adminType } from "../type";
+import { adminType,informType } from "../type";
 
 const initialState = {
     data: null,
@@ -12,6 +12,10 @@ export const accessRangeReducer = (state = initialState, action) => {
                 data: action.data,
                 inform: action.inform
             }
+            case informType:
+                return {
+                    inform: action.inform
+                }
         default:
             return state;
     }

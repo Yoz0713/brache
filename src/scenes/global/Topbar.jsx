@@ -23,7 +23,14 @@ const Topbar = () => {
   const userData = useSelector(state => state.accessRangeReducer)
 
   return (
-    <Box display="flex" justifyContent={isMobile ? "space-between" : "flex-end"} alignItems={"center"} p={2}>
+    <Box display="flex" justifyContent={isMobile ? "space-between" : "flex-end"} alignItems={"center"} p={2} sx={{
+      position:"fixed",
+      left:0,
+      top:0,
+      backgroundColor:"#FCFCFC",
+      zIndex:800,
+      width:"100%"
+    }}>
       {/* menu hamburger */}
       <MenuIcon sx={
         {

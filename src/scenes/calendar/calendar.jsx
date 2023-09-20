@@ -22,7 +22,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { get_course_template_list } from '../../axios-api/calendarTemplateData';
 
-
 function FirstComponent() {
   const [data, setData] = useState({})
   const [open, setOpen] = useState(false)
@@ -140,7 +139,7 @@ function ImportTemplate() {
       <Button onClick={() => {
         setOpen(true)
       }}>
-        匯入模板
+        匯入課表
       </Button>
       <Dialog open={open} onClose={handleCancel} >
         <Box display={"flex"} justifyContent={"center"} alignItems={"center"} position={"relative"} zIndex={10} width={"100%"} height={"100%"} left={0} top={0}
@@ -194,6 +193,23 @@ function ImportTemplate() {
   );
 }
 
+function TeacherColor ({data}){
+  return(
+    <Box display={"flex"} gap={"20px"} flexWrap={"wrap"}  m={"19px 0 0"}>
+      {
+          data.map((item)=>{
+            return(
+                <Box display={"flex"} gap={"5px"} alignItems={"center"} >
+                  <span style={{lineHeight:0}}>{item.name}</span>
+                  <div style={{backgroundColor:`${item.t_color}`,width:"13px",height:"13px",borderRadius:"50%",marginBottom:"2px"}}></div>
+                </Box>
+            )
+        })
+      }
+    </Box>
+  
+  )
+}
 
 const CalendarTop = () => {
   const theme = useTheme();
@@ -220,10 +236,13 @@ const CalendarTop = () => {
     const startDate = initDate.year + "-" + initDate.month + "-" + initDate.day
     const endDate = formatDateBack(getWeekDates(startDate)[6])
     calendarApi.getAll(startDate, endDate).then((data) => {
+      console.log(data.data)
       dispatch(calendarTableDataAction(dataTransformTable(data.data)))
     })
   }, [])
-
+  useEffect(()=>{
+    console.log(teacherAll)
+  },[teacherAll])
   return (
     <Box m={"25px 0"} sx={
       {
@@ -257,6 +276,7 @@ const CalendarTop = () => {
     }>
       {currentDate && tableData ?
         <>
+       
           <Box className='title' display={"flex"} width={"100%"} justifyContent={"space-between"} gap={"15px"} alignItems={"center"} flexWrap={"wrap"}>
             <Box display={"flex"} gap={"15px"} className='buttonBox' >
               <Button onClick={() => {
@@ -333,6 +353,7 @@ const CalendarTop = () => {
             </Box>
 
           </Box>
+          {teacherAll && <TeacherColor data={teacherAll}/>}
           <Calendar ref={scrollRef} tableData={tableData} currentDate={currentDate} studentAll={studentAll} teacherAll={teacherAll} />
         </>
         : <IsLoading />
@@ -573,16 +594,22 @@ const Calendar = forwardRef(({ tableData, currentDate, studentAll, teacherAll },
 
 const LessonUnit = ({ data, count, teacherAll, studentAll }) => {
   let gap;
-
+  let classTimeStamp;
   if (data) {
     const start = data.StartTime;
     const end = data.EndTime;
     gap = calculateDifferenceIn15Minutes(start, end)
+    // 将日期时间字符串解析为Date对象
+    const EndTime = new Date(data.c_date +"T"+ end);
+
+    // 获取时间戳
+     classTimeStamp = EndTime.getTime();
+
   }
 
   return (
     <Box key={data && data.Tb_index} flexBasis="25%" width={"100%"}  >
-      {count > 0 ? <LessonPopUp teacherAll={teacherAll} studentAll={studentAll} id={data?.Tb_index} name={data?.c_name} gap={gap} bg={data?.t_color} type={"update"} /> : null}
+      {(data && count > 0) ? <LessonPopUp teacherAll={teacherAll} studentAll={studentAll} id={data.Tb_index} name={data.c_name} gap={gap} bg={(Date.now() < classTimeStamp)||(data.signin_time && data.signout_time) ? data.t_color : "#FF0000"} type={"update"} /> : null}
     </Box>
   )
 }
@@ -850,7 +877,7 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll }) => {
   }
 }
 
-const TimeSelect = ({ setCurrentDate }) => {
+export const TimeSelect = ({ setCurrentDate }) => {
   const [open, setOpen] = useState(false)
   const [date, setDate] = useState(new Date())
   const handleCancel = () => {
@@ -903,7 +930,6 @@ const TimeSelect = ({ setCurrentDate }) => {
 
 
 const ClassOverView = () => {
-
   return (
     <div style={{ width: '95%', margin: '20px auto 0' }}>
       <Header title="課表行事曆" subtitle="昨日之前的課表(含昨日)，不能做新增、修改、刪除的操作!" warm={true} />

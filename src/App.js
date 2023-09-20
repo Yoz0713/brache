@@ -8,7 +8,7 @@ import Invoices from "./scenes/invoices";
 import Contacts from "./scenes/contacts";
 import Form from "./scenes/form";
 import FAQ from "./scenes/faq";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { Box, CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import Calendar from "./scenes/calendar/calendar";
 import ModuleManage from "./scenes/module-manage";
@@ -25,6 +25,9 @@ import TeacherDataList from "./scenes/teacher";
 import ClassroomCalendar from "./scenes/calendar";
 import SignInSheet from "./scenes/signin-sheet";
 import ClassRecord from "./scenes/class-record";
+import ClassHistory from "./scenes/class-history";
+import ScheduleChange from "./scenes/change-system/scheduleChange";
+import ChangeHistory from "./scenes/change-system/changeHistory";
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
@@ -67,7 +70,7 @@ const Main = ({ isSidebar, setIsSidebar }) => {
   return (
     <div className="app" >
       <Sidebar isSidebar={isSidebar} />
-      <main className="content" style={{ position: "relative" }}>
+      <Box className="content" sx={{ position: "relative",paddingLeft:"270px",paddingTop:"50px","@media all and (max-width:850px)":{padding:"55px 0 0 0"} }}>
         <Topbar setIsSidebar={setIsSidebar} />
         <Routes>
 
@@ -87,9 +90,12 @@ const Main = ({ isSidebar, setIsSidebar }) => {
           <Route path="/authority" element={<Authority />} />
           <Route path="/admin-management" element={<AdminManagement />} />
           <Route path="/class-record" element={<ClassRecord />} />
+          <Route path="/class-history" element={<ClassHistory />} />
+          <Route path="/schedule-change" element={<ScheduleChange />} />
+          <Route path="/change-history" element={<ChangeHistory />} />
           <Route path="*" element={<h1 style={{ width: "100%", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>此功能尚未製作完成</h1>} />
         </Routes>
-      </main>
+      </Box>
     </div>
   )
 }

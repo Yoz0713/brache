@@ -1,4 +1,4 @@
-import { snackbarOpen, menuIn, systemTree, adminType, clearType, calendarDateType, calednarTableDataType } from "./type"
+import { snackbarOpen, menuIn, systemTree, adminType, clearType, calendarDateType, calednarTableDataType, informType } from "./type"
 export const snackBarOpenAction = (bolean, str, severity) => {
     return {
         type: snackbarOpen,
@@ -28,6 +28,12 @@ export const adminAction = (data, inform) => {
     return {
         type: adminType,
         data: data,
+        inform: inform
+    }
+}
+export const infromAction = (inform) => {
+    return {
+        type: informType,
         inform: inform
     }
 }

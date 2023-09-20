@@ -3,6 +3,7 @@ const snackbarOpen = 'snackbarOpen';
 const menuIn = 'menuIn';
 const systemTree = "systemTreeData"
 const adminType = "adminData"
+const informType = "informData"
 const clearType = "clearAllRedux"
 const calendarDateType = "switchCalendarDate"
 const calednarTableDataType = "switchCalednarTableData"
@@ -14,5 +15,6 @@ module.exports = {
     adminType,
     clearType,
     calendarDateType,
-    calednarTableDataType
+    calednarTableDataType,
+    informType
 };

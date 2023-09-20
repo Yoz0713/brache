@@ -13,11 +13,14 @@ import {
     Container,
 } from "@mui/material";
 import axios from "axios";
+import { infromAction } from "../../redux/action";
+import { useDispatch } from "react-redux";
+import axiosInstance from "../../axios-api/axiosInstance";
 export default function Login() {
     const [remember, setRemember] = useState(window.localStorage.getItem("account") !== null)
     const [recaptcha, setRecaptcha] = useState(null)
     const navigate = useNavigate();
-
+    const dispatch = useDispatch(null)
 
 
 
@@ -42,6 +45,7 @@ export default function Login() {
                     window.localStorage.setItem("account", data.get("account"))
                 }
                 window.alert(`${res.data.msg}`)
+           
                 navigate("/dashboard");
             } else {
                 window.alert(`${res.data.msg}`)
