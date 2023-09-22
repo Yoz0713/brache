@@ -137,14 +137,13 @@ function OpenSelectClass({teacher=null,date=null,setClassDate,data,setData,type 
     )
 }
 
-function TargetClass({course_id,teacher=null,setTeacher=()=>{},type="system",beforeData=null}){
+function TargetClass({course_id,teacher=null,setTeacher=()=>{},type=null,beforeData=null}){
     const [courseData,setCourseData]=useState(null)
     useEffect(()=>{
         //calendarApi
-    
             getOne(course_id,(data)=>{
-                console.log(data,123)
-                if(!teacher){
+            
+                if(teacher !==null){
                     setTeacher(data.data.data[0].teacher_id)
                 }
                 setCourseData(data.data.data[0])
@@ -153,7 +152,8 @@ function TargetClass({course_id,teacher=null,setTeacher=()=>{},type="system",bef
     },[course_id])
     return(
     <>
-        {((courseData && beforeData))|| (courseData && type !== "history")&&
+        {(((courseData && beforeData)) || (courseData && type !== "history"))
+        &&
             <>
             <Box sx={{
                  "& ul":{
@@ -203,9 +203,9 @@ function TargetClass({course_id,teacher=null,setTeacher=()=>{},type="system",bef
                        :
                        <>
                         <div className="box">{courseData.c_name}</div>
-                        <div className="box">{beforeData.before_date}</div>
-                        <div className="box">{beforeData.before_room_name}</div>
-                        <div className="box">{beforeData.before_StartTime}</div>
+                        <div className="box">{beforeData?.before_date}</div>
+                        <div className="box">{beforeData?.before_room_name}</div>
+                        <div className="box">{beforeData?.before_StartTime}</div>
                        </>
                        
                     }
@@ -477,7 +477,7 @@ export default function ChangeSheet({sheetId,crud,setListData}){
                         </Box>
                             }
                             
-                            {data.course_id && crud === "history" ? <TargetClass course_id={data.course_id} type={crud} beforeData={data}/>  : <TargetClass course_id={data.course_id}/>}
+                            {(data.course_id && crud === "history") ? <TargetClass course_id={data.course_id} type={crud} beforeData={data}/>  : <TargetClass course_id={data.course_id}/>}
                             {classDate &&<OpenSelectClass date={classDate} setClassDate={setClassDate} setData={setData} data={data}/>}
                         </DialogContent>
                         <DialogContent sx={{padding:0,margin:"10px 0"}}>

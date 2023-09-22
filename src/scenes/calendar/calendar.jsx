@@ -256,9 +256,9 @@ const CalendarTop = () => {
         if (accessData) {
             const result = accessDetect(accessData, "課表總覽")
             setAuthorityRange({
-                p_delete: result.p_delete === "1" ? true : false,
-                p_insert: result.p_insert === "1" ? true : false,
-                p_update: result.p_update === "1" ? true : false,
+                p_delete: result?.p_delete === "1" ? true : false,
+                p_insert: result?.p_insert === "1" ? true : false,
+                p_update: result?.p_update === "1" ? true : false,
             })
         }
     }, [accessData])
@@ -713,9 +713,9 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll }) => {
        if (accessData) {
            const result = accessDetect(accessData, "課表總覽")
            setAuthorityRange({
-               p_delete: result.p_delete === "1" ? true : false,
-               p_insert: result.p_insert === "1" ? true : false,
-               p_update: result.p_update === "1" ? true : false,
+               p_delete: result?.p_delete === "1" ? true : false,
+               p_insert: result?.p_insert === "1" ? true : false,
+               p_update: result?.p_update === "1" ? true : false,
            })
        }
    }, [accessData])
