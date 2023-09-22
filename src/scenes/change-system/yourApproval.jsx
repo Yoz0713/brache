@@ -6,7 +6,7 @@ import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
 import ChangeSheet from "./changeSheet";
 
-export default function YourApproval({listData=[]}){
+export default function YourApproval({listData=[],setListData}){
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isMobile = useMediaQuery('(max-width:1000px)'); // 媒体查询判断是否为手机屏幕
@@ -43,7 +43,7 @@ export default function YourApproval({listData=[]}){
             renderCell: (rows) => {
                 return (
                     <Box display={"flex"} flexWrap={"wrap"} gap={"12px"} width="100%" >
-                        <ChangeSheet data={rows.row} crud={"needApproval"} sheetId={rows.row.Tb_index}/>
+                        <ChangeSheet data={rows.row} crud={"needApproval"} sheetId={rows.row.Tb_index} setListData={setListData}/>
                     </Box>
                 )
             }

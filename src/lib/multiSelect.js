@@ -156,7 +156,7 @@ const Listbox = styled('ul')(
 );
 
 
-export default function MultiSelect({ studentAll, data, setData, type }) {
+export default function MultiSelect({ studentAll, data, setData, type,author }) {
   const defaultIndex = []
   if (type === "update") {
     studentAll.forEach((item, i) => {
@@ -197,7 +197,7 @@ export default function MultiSelect({ studentAll, data, setData, type }) {
   }, [value]);
 
   return (
-    <Root>
+    <Root sx={{pointerEvents:author?"auto":"none"}}>
       {studentAll && (
         <>
           <div {...getRootProps()}>

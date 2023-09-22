@@ -17,6 +17,7 @@ import { calendarDateAction, snackBarOpenAction } from '../../redux/action';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import SelectTemplate from './selectTemplate';
+import useAuthorityRange from '../../custom-hook/useAuthorityRange';
 
 
 const CalendarTop = ({ id }) => {
@@ -44,6 +45,23 @@ const CalendarTop = ({ id }) => {
       setTableData(dataTransformTable(data.data.data, "template"))
     })
   }, [])
+
+   //權限
+   const { accessData, accessDetect } = useAuthorityRange()
+   const [authorityRange, setAuthorityRange] = useState({})
+ 
+   //獲取權限範圍
+   useEffect(() => {
+       if (accessData) {
+           const result = accessDetect(accessData, "公版課表")
+           setAuthorityRange({
+               p_delete: result.p_delete === "1" ? true : false,
+               p_insert: result.p_insert === "1" ? true : false,
+               p_update: result.p_update === "1" ? true : false,
+           })
+       }
+   }, [accessData])
+
 
   return (
     <Box m={"25px 0"} sx={
@@ -135,11 +153,12 @@ const CalendarTop = ({ id }) => {
                   <ArrowForwardIcon />
                 </div>
               </Box>
-              <LessonPopUp type={"insert"} ct_list_id={id} studentAll={studentAll} teacherAll={teacherAll} tableData={tableData} setTableData={setTableData} />
+              {authorityRange.p_insert &&  <LessonPopUp type={"insert"} ct_list_id={id} studentAll={studentAll} teacherAll={teacherAll} tableData={tableData} setTableData={setTableData} />}
+          
             </Box>
 
           </Box>
-          <Calendar ref={scrollRef} tableData={tableData} studentAll={studentAll} teacherAll={teacherAll} setTableData={setTableData} ct_list_id={id} />
+          <Calendar ref={scrollRef} tableData={tableData} studentAll={studentAll} teacherAll={teacherAll} setTableData={setTableData} ct_list_id={id} authorityRange={authorityRange}/>
         </>
         : <IsLoading />
       }
@@ -148,7 +167,7 @@ const CalendarTop = ({ id }) => {
   )
 }
 
-const Calendar = forwardRef(({ tableData, studentAll, teacherAll, setTableData, ct_list_id }, ref) => {
+const Calendar = forwardRef(({ tableData, studentAll, teacherAll, setTableData, ct_list_id ,authorityRange}, ref) => {
   const theme = useTheme();
 
   const colors = tokens(theme.palette.mode);
@@ -372,7 +391,7 @@ const Calendar = forwardRef(({ tableData, studentAll, teacherAll, setTableData, 
                                     }
                                   }
                                   return (
-                                    <LessonUnit ct_list_id={ct_list_id} tableData={tableData} setTableData={setTableData} teacherAll={teacherAll} studentAll={studentAll} count={count} uniqueId={uniqueId} data={tableData?.[week]?.[class_type]?.[addMinutesToTime(time.start, (i) * 15)]} />
+                                    <LessonUnit  authorityRange={authorityRange} ct_list_id={ct_list_id} tableData={tableData} setTableData={setTableData} teacherAll={teacherAll} studentAll={studentAll} count={count} uniqueId={uniqueId} data={tableData?.[week]?.[class_type]?.[addMinutesToTime(time.start, (i) * 15)]} />
                                   )
                                 })
                               }
@@ -394,7 +413,7 @@ const Calendar = forwardRef(({ tableData, studentAll, teacherAll, setTableData, 
   )
 })
 
-const LessonUnit = ({ data, count, teacherAll, studentAll, tableData, setTableData, ct_list_id }) => {
+const LessonUnit = ({ data, count, teacherAll, studentAll, tableData, setTableData, ct_list_id,authorityRange }) => {
   let gap;
   if (data) {
     const start = data.StartTime;
@@ -404,12 +423,12 @@ const LessonUnit = ({ data, count, teacherAll, studentAll, tableData, setTableDa
 
   return (
     <Box key={data && data.Tb_index} flexBasis="25%" width={"100%"}  >
-      {count > 0 ? <LessonPopUp ct_list_id={ct_list_id} teacherAll={teacherAll} studentAll={studentAll} id={data?.Tb_index} name={data?.c_name} gap={gap} bg={data?.t_color} type={"update"} tableData={tableData} setTableData={setTableData} /> : null}
+      {count > 0 ? <LessonPopUp  authorityRange={authorityRange} ct_list_id={ct_list_id} teacherAll={teacherAll} studentAll={studentAll} id={data?.Tb_index} name={data?.c_name} gap={gap} bg={data?.t_color} type={"update"} tableData={tableData} setTableData={setTableData} /> : null}
     </Box>
   )
 }
 
-const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll, tableData, setTableData, ct_list_id }) => {
+const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll, tableData, setTableData, ct_list_id,authorityRange }) => {
 
   const [open, setOpen] = useState(false)
   const [data, setData] = useState({})
@@ -495,7 +514,7 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll, tableDat
         }}>
           {(data || type === "insert") && studentAll.length > 0 && teacherAll.length > 0 ?
             <>
-              <DialogTitle sx={{ fontSize: "20px" }}>{type === "update" ? "課程修改" : "課程新增"}</DialogTitle>
+             <DialogTitle sx={{ fontSize: "20px" }}>{!authorityRange?.p_update ?"課程瀏覽" : type === "update" ? "課程修改" : "課程新增"}</DialogTitle>
               <DialogContent sx={{ width: "100%", padding: "20px 24px !important" }} >
                 {teacherAll &&
                   <FormControl fullWidth >
@@ -507,6 +526,7 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll, tableDat
                       })
                     }}
                       value={data.teacher_id}
+                      disabled={!authorityRange?.p_update}
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
                       label="老師"
@@ -536,18 +556,22 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll, tableDat
                     })
                   }}
                   value={data.c_name}
+                  disabled={!authorityRange?.p_update}
                 />
               </DialogContent>
               <DialogContent>
-                {((studentAll && data.student) || type === "insert") && <MultiSelect studentAll={studentAll} data={data} setData={setData} type={type} />}
+                {((studentAll && data.student) || type === "insert") && <MultiSelect studentAll={studentAll} data={data} setData={setData} type={type} author={authorityRange?.p_update}/>}
               </DialogContent>
               <DialogContent sx={{ display: "flex", alignItems: "center", gap: "15px", flexWrap: "wrap", "& .input": { flex: "0 0 45%", "& label": { color: "#000" }, "& input": { WebkitTextFillColor: "#000" } } }}>
                 <Box flex={"0 0 100%"}>
                   <Typography variant="h5" component="h6">課堂時間及教室</Typography>
-                  <Box display={"flex"} alignItems={"center"}>
+                  {authorityRange?.p_update &&
+                    <Box display={"flex"} alignItems={"center"}>
                     <p style={{ color: "red", fontSize: "13px", letterSpacing: "0.1em", margin: "0px 5px 6px 0" }}>(上課時間及教室請透過右邊行事曆修改)--{'>'}</p>
                     <SelectTemplateContainer tableData={tableData} initDay={data.c_week} setData={setData} data={data} />
                   </Box>
+                  }
+                
                 </Box>
                 <TextField
                   autoFocus
@@ -624,11 +648,12 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll, tableDat
                 />
 
               </DialogContent>
-              <DialogContent sx={{ display: "flex", justifyContent: type === "update" ? "space-between" : "flex-end", alignItems: "center", "& button": { fontSize: "16px" } }}>
-                {type === "update" && <Button onClick={handleDelete} sx={{ backgroundColor: "#d85847", color: "#fff", "&:hover": { backgroundColor: "#ad4638" } }}>刪除</Button>}
+              <DialogContent sx={{ display: "flex", justifyContent: (type === "update" && authorityRange?.p_delete)? "space-between" : "flex-end", alignItems: "center", "& button": { fontSize: "16px" } }}>
+                {authorityRange?.p_delete&& type === "update" && <Button onClick={handleDelete} sx={{ backgroundColor: "#d85847", color: "#fff", "&:hover": { backgroundColor: "#ad4638" } }}>刪除</Button>}
+              
                 <Box>
-                  <Button onClick={handleSubmit}>{type === "update" ? "修改" : "新增"}</Button>
-                  <Button onClick={handleCancel}>取消</Button>
+                  {authorityRange?.p_update && <Button onClick={handleSubmit}>{type === "update" ? "修改" : "新增"}</Button>}
+                  <Button onClick={handleCancel}>{authorityRange?.p_update ? "取消" : "退出"}</Button>
                 </Box>
               </DialogContent>
 

@@ -47,7 +47,7 @@ function UpdatedStudentData({ id, sx, handleButtonClick }) {
             studentApi.updateOne({
                 name: name,
                 s_sex: gender,
-                s_year: age,
+                s_birthday: age,
                 Tb_index: id,
                 s_adds: address,
                 s_phone: phone
@@ -68,8 +68,9 @@ function UpdatedStudentData({ id, sx, handleButtonClick }) {
     }
     useEffect(() => {
         if (data) {
+            console.log(data)
             setName(data.name)
-            setAge(data.s_year)
+            setAge(data.s_birthday)
             setGender(data.s_sex)
             setAddress(data.s_adds)
             setPhone(data.s_phone)
@@ -149,20 +150,18 @@ function UpdatedStudentData({ id, sx, handleButtonClick }) {
                     </DialogContent>
                     <DialogContent>
                         <FormControl fullWidth>
-                            <InputLabel id="demo-simple-select-label">Age</InputLabel>
-                            <Select onChange={(e) => {
+                        <TextField
+                            id="date"
+                            label="生日"
+                            type="date"
+                            InputLabelProps={{
+                            shrink: true,
+                            }}
+                            value={age}
+                            onChange={(e)=>{
                                 setAge(e.target.value)
-                            }} value={age}
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                label="Age"
-                                defaultValue={1} sx={{ width: "100px" }}>
-                                {Array.from({ length: 120 }, (_, index) => index + 1).map((number) => (
-                                    <MenuItem key={number} value={number}>
-                                        {number}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                            }}
+                        />
                         </FormControl>
                     </DialogContent>
                     <DialogContent>

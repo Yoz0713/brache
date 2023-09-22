@@ -103,7 +103,7 @@ function UpdatedAdminData({ id, type, sx, handleButtonClick }) {
             admin_pwd: userData.password,
             position_type: userData.radio,
             s_sex: userData.gender,
-            s_year: userData.age,
+            s_birthday: userData.s_birthday,
             t_skill: userData.t_skill,
             t_color: userData.t_color,
             s_adds: userData.s_adds,
@@ -134,7 +134,7 @@ function UpdatedAdminData({ id, type, sx, handleButtonClick }) {
                 } else {
                     if (userData.password) {
                         if (formPage !== 1) {
-                            if ((userData.age || userData.radio === "2") && userData.gender && (userData.t_skill || userData.radio === "3")) {
+                            if ((userData.s_birthday || userData.radio === "2") && userData.gender && (userData.t_skill || userData.radio === "3")) {
                                 insertData()
                             } else {
                                 window.alert("尚有欄位未填寫")
@@ -373,25 +373,22 @@ const FormPage = ({ userData, setUserData, authorityData, type, formPage }) => {
                 {userData.radio === "3" ?
                     <DialogContent>
                         <FormControl fullWidth>
-                            <InputLabel id="demo-simple-select-label">Age</InputLabel>
-                            <Select onChange={(e) => {
+                        <TextField
+                            id="date"
+                            label="生日"
+                            type="date"
+                            InputLabelProps={{
+                            shrink: true,
+                            }}
+                            value={userData.s_birthday}
+                            onChange={(e)=>{
                                 setUserData({
                                     ...userData,
-                                    age: e.target.value,
+                                    s_birthday: e.target.value,
                                 })
-                            }} value={userData.age}
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                label="Age"
-                                defaultValue={1} sx={{ width: "100px" }}>
-                                {Array.from({ length: 120 }, (_, index) => index + 1).map((number) => (
-                                    <MenuItem key={number} value={number}>
-                                        {number}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                            }}
+                        />
                         </FormControl>
-
                     </DialogContent> :
                     <>
                         <DialogContent>

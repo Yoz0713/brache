@@ -46,7 +46,7 @@ export default function Login() {
                 }
                 window.alert(`${res.data.msg}`)
            
-                navigate("/dashboard");
+                navigate("/calendar/overview");
             } else {
                 window.alert(`${res.data.msg}`)
                 window.location.reload()

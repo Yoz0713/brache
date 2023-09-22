@@ -15,6 +15,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import RemarkUpdated from './remark_updated'
 import AddPractice from './addPractice'
+import useAuthorityRange from '../../custom-hook/useAuthorityRange'
 
 function DateSelector({setDate}) {
     const [data, setData] = useState({})
@@ -78,6 +79,21 @@ function RecordSheet({studentData}){
   const handleClose = ()=>{
     setOpen(false)
   }
+  //權限
+  const { accessData, accessDetect } = useAuthorityRange()
+  const [authorityRange, setAuthorityRange] = useState({})
+
+  //獲取權限範圍
+  useEffect(() => {
+      if (accessData) {
+          const result = accessDetect(accessData, "上課紀錄表")
+          setAuthorityRange({
+              p_delete: result.p_delete === "1" ? true : false,
+              p_insert: result.p_insert === "1" ? true : false,
+              p_update: result.p_update === "1" ? true : false,
+          })
+      }
+  }, [accessData])
   return(
     <>
        <Button  className='studentBtn' sx={{backgroundColor:"transparent",color:"#000",boxShadow:"none",borderRadius:"0",width:"50%",padding:"10px",margin:"0 auto"}} onClick={() => {
@@ -179,7 +195,7 @@ function RecordSheet({studentData}){
           }
         }}>
         <h2 className='record-title'>本周功課及注意事項</h2>
-        {!(recordData.admin_id || recordData.teacher_id) && userData.inform.name === "老師" && <RemarkUpdated data={recordData} setRecordData={setRecordData}/>}
+        {!(recordData.admin_id || recordData.teacher_id) && userData.inform.name === "老師"&& authorityRange.p_update && <RemarkUpdated data={recordData} setRecordData={setRecordData}/>}
         </Box>
         <p className='remark-area'>{recordData.remark? recordData.remark : "老師尚未填寫注意事項"}</p>
         <Box width={"100%"} position={"relative"} sx={{
@@ -193,7 +209,7 @@ function RecordSheet({studentData}){
           }
         }}>
      <h2 className='record-title' style={{marginBottom:0}}>本周練習時間</h2>
-        {!(recordData.admin_id || recordData.teacher_id) && userData.inform.name === "學生" && <AddPractice data={recordData} setRecordData={setRecordData}/>}
+        {!(recordData.admin_id || recordData.teacher_id) && userData.inform.name === "學生" && authorityRange.p_update && <AddPractice data={recordData} setRecordData={setRecordData}/>}
      
         </Box>
    
@@ -223,46 +239,52 @@ function RecordSheet({studentData}){
           <Box className='sign' width={"100%"} display={"flex"} m={"15px 0 0 0"} border={"1px solid #000"}>
               <Box width={"50%"} borderRight={"1px solid #000"}>
                   <h4>巴雀藝術檢閱</h4>
+                  {authorityRange.p_update &&
                   <div className="sign-area">
-                      {recordData.admin_id ? <TaskAltIcon /> : userData.inform.name !== "學生" ?
-                        <Button variant="contained" sx={{ backgroundColor: "#6DC4C5" }} onClick={() => {
-                          if(userData.inform.name !== "學生" && userData.inform.name !== "老師"){
-                            if(window.confirm("簽閱後不可再修改此紀錄表，是否要完成簽閱?")){
-                              recordListApi.set_teacher_record_signIn({teacher_id:userData.inform.Tb_index,record_id:recordData.record_id},()=>{
-                                recordListApi.get_course_record_one(studentData.student_record_id,(res)=>{
-                                  setRecordData(res.data.data[0])
-                                })
-                              })
-                            }
-                          }else{
-                            window.alert("此欄位由巴雀藝術簽閱")
-                          }
-                         
+                  {recordData.admin_id ? <TaskAltIcon /> : userData.inform.name !== "學生" ?
+                    <Button variant="contained" sx={{ backgroundColor: "#6DC4C5" }} onClick={() => {
+                      if(userData.inform.name !== "學生" && userData.inform.name !== "老師"){
+                        if(window.confirm("簽閱後不可再修改此紀錄表，是否要完成簽閱?")){
+                          recordListApi.set_teacher_record_signIn({teacher_id:userData.inform.Tb_index,record_id:recordData.record_id},()=>{
+                            recordListApi.get_course_record_one(studentData.student_record_id,(res)=>{
+                              setRecordData(res.data.data[0])
+                            })
+                          })
+                        }
+                      }else{
+                        window.alert("此欄位由巴雀藝術簽閱")
                       }
-                      }>簽閱</Button> : "巴雀藝術尚未簽閱"
-                      }
-                  </div>
+                     
+                  }
+                  }>簽閱</Button> : "巴雀藝術尚未簽閱"
+                  }
+              </div>
+                  }
+                 
               </Box>
               <Box width={"50%"}>
                   <h4>老師檢閱</h4>
-                  <div className="sign-area">
-                      {recordData.teacher_id ? <TaskAltIcon /> : userData.inform.name !== "學生" ?
-                        <Button variant="contained" sx={{ backgroundColor: "#6DC4C5" }} onClick={() => {
-                          if(userData.inform.name === "老師"){
-                            if(window.confirm("簽閱後不可再修改此紀錄表，是否要完成簽閱?")){
-                              recordListApi.set_teacher_record_signIn({teacher_id:userData.inform.Tb_index,record_id:recordData.record_id},()=>{
-                                recordListApi.get_course_record_one(studentData.student_record_id,(res)=>{
-                                  setRecordData(res.data.data[0])
-                                })
-                              })
-                            }
-                          }else{
-                            window.alert("此欄位由課堂老師簽閱")
-                          }
-                      }
-                      }>簽閱</Button>: "老師尚未簽閱"
-                      }
-                  </div>
+                  {authorityRange.p_update &&
+                     <div className="sign-area">
+                     {recordData.teacher_id ? <TaskAltIcon /> : userData.inform.name !== "學生" ?
+                       <Button variant="contained" sx={{ backgroundColor: "#6DC4C5" }} onClick={() => {
+                         if(userData.inform.name === "老師"){
+                           if(window.confirm("簽閱後不可再修改此紀錄表，是否要完成簽閱?")){
+                             recordListApi.set_teacher_record_signIn({teacher_id:userData.inform.Tb_index,record_id:recordData.record_id},()=>{
+                               recordListApi.get_course_record_one(studentData.student_record_id,(res)=>{
+                                 setRecordData(res.data.data[0])
+                               })
+                             })
+                           }
+                         }else{
+                           window.alert("此欄位由課堂老師簽閱")
+                         }
+                     }
+                     }>簽閱</Button>: "老師尚未簽閱"
+                     }
+                 </div>
+                  }
+               
               </Box>
           </Box>
       </Box> :<IsLoading/>

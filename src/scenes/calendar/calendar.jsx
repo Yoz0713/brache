@@ -21,6 +21,7 @@ import { calendarDateAction, calendarTableDataAction, snackBarOpenAction } from 
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { get_course_template_list } from '../../axios-api/calendarTemplateData';
+import useAuthorityRange from '../../custom-hook/useAuthorityRange';
 
 function FirstComponent() {
   const [data, setData] = useState({})
@@ -134,6 +135,8 @@ function ImportTemplate() {
     })
   }, [])
 
+
+
   return (
     <>
       <Button onClick={() => {
@@ -243,6 +246,23 @@ const CalendarTop = () => {
   useEffect(()=>{
     console.log(teacherAll)
   },[teacherAll])
+
+    //權限
+    const { accessData, accessDetect } = useAuthorityRange()
+    const [authorityRange, setAuthorityRange] = useState({})
+  
+    //獲取權限範圍
+    useEffect(() => {
+        if (accessData) {
+            const result = accessDetect(accessData, "課表總覽")
+            setAuthorityRange({
+                p_delete: result.p_delete === "1" ? true : false,
+                p_insert: result.p_insert === "1" ? true : false,
+                p_update: result.p_update === "1" ? true : false,
+            })
+        }
+    }, [accessData])
+
   return (
     <Box m={"25px 0"} sx={
       {
@@ -288,7 +308,7 @@ const CalendarTop = () => {
                 })
                 dispatch(calendarDateAction(getWeekInfoForDate(new Date())))
               }}>TODAY</Button>
-              <ImportTemplate />
+              {authorityRange.p_update&&<ImportTemplate />}
             </Box>
             <h4>{`${currentDate.year}年${currentDate.month}月第${currentDate.weekNumber}週` + "學生課表"}</h4>
             <Box display={"flex"} justifyContent={"space-between"} gap={"15px"} m={isMobile ? "0 0 0 auto" : "0"}>
@@ -349,7 +369,8 @@ const CalendarTop = () => {
                 <span>選擇日期</span>
                 <FirstComponent currentDate={currentDate} />
               </div>
-              <LessonPopUp type={"insert"} studentAll={studentAll} teacherAll={teacherAll} />
+              {authorityRange.p_update&& <LessonPopUp type={"insert"} studentAll={studentAll} teacherAll={teacherAll} />}
+          
             </Box>
 
           </Box>
@@ -684,6 +705,24 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll }) => {
     }
   }, [currentDate])
 
+   //權限
+   const { accessData, accessDetect } = useAuthorityRange()
+   const [authorityRange, setAuthorityRange] = useState({})
+   //獲取權限範圍
+   useEffect(() => {
+       if (accessData) {
+           const result = accessDetect(accessData, "課表總覽")
+           setAuthorityRange({
+               p_delete: result.p_delete === "1" ? true : false,
+               p_insert: result.p_insert === "1" ? true : false,
+               p_update: result.p_update === "1" ? true : false,
+           })
+       }
+   }, [accessData])
+
+   
+
+
   if (bg || type === "insert") {
     return (
       <>
@@ -718,7 +757,7 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll }) => {
         }}>
           {(data || type === "insert") && studentAll.length > 0 && teacherAll.length > 0 ?
             <>
-              <DialogTitle sx={{ fontSize: "20px" }}>{type === "update" ? "課程修改" : "課程新增"}</DialogTitle>
+              <DialogTitle sx={{ fontSize: "20px" }}>{!authorityRange.p_update ?"課程瀏覽" : type === "update" ? "課程修改" : "課程新增"}</DialogTitle>
               <DialogContent sx={{ width: "100%", padding: "20px 24px !important" }} >
                 {teacherAll &&
                   <FormControl fullWidth >
@@ -729,6 +768,7 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll }) => {
                         teacher_id: e.target.value,
                       })
                     }}
+                    disabled={!authorityRange.p_update}
                       value={data.teacher_id}
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
@@ -759,18 +799,22 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll }) => {
                     })
                   }}
                   value={data.c_name}
+                  disabled={!authorityRange.p_update}
                 />
               </DialogContent>
               <DialogContent>
-                {((studentAll && data.student) || type === "insert") && <MultiSelect studentAll={studentAll} data={data} setData={setData} type={type} />}
+                {((studentAll && data.student) || type === "insert") && <MultiSelect studentAll={studentAll} data={data} setData={setData} type={type} author={authorityRange.p_update}/>}
               </DialogContent>
               <DialogContent sx={{ display: "flex", alignItems: "center", gap: "15px", flexWrap: "wrap", "& .input": { flex: "0 0 45%", "& label": { color: "#000" }, "& input": { WebkitTextFillColor: "#000" } } }}>
                 <Box flex={"0 0 100%"}>
                   <Typography variant="h5" component="h6">課堂時間及教室</Typography>
-                  <Box display={"flex"} alignItems={"center"}>
+                  {authorityRange.p_update &&
+                    <Box display={"flex"} alignItems={"center"}>
                     <p style={{ color: "red", fontSize: "13px", letterSpacing: "0.1em", margin: "0px 5px 6px 0" }}>(上課時間及教室請透過右邊行事曆修改)--{'>'}</p>
                     <TimeSelect setCurrentDate={setCurrentDate} />
                   </Box>
+                  }
+                
                 </Box>
                 <TextField
                   autoFocus
@@ -847,11 +891,12 @@ const LessonPopUp = ({ id, name, gap, bg, type, teacherAll, studentAll }) => {
                 />
 
               </DialogContent>
-              <DialogContent sx={{ display: "flex", justifyContent: type === "update" ? "space-between" : "flex-end", alignItems: "center", "& button": { fontSize: "16px" } }}>
-                {type === "update" && <Button onClick={handleDelete} sx={{ backgroundColor: "#d85847", color: "#fff", "&:hover": { backgroundColor: "#ad4638" } }}>刪除</Button>}
+              <DialogContent sx={{ display: "flex", justifyContent: (type === "update" && authorityRange.p_delete)? "space-between" : "flex-end", alignItems: "center", "& button": { fontSize: "16px" } }}>
+                {authorityRange.p_delete&& type === "update" && <Button onClick={handleDelete} sx={{ backgroundColor: "#d85847", color: "#fff", "&:hover": { backgroundColor: "#ad4638" } }}>刪除</Button>}
+              
                 <Box>
-                  <Button onClick={handleSubmit}>{type === "update" ? "修改" : "新增"}</Button>
-                  <Button onClick={handleCancel}>取消</Button>
+                  {authorityRange.p_update && <Button onClick={handleSubmit}>{type === "update" ? "修改" : "新增"}</Button>}
+                  <Button onClick={handleCancel}>{authorityRange.p_update ? "取消" : "退出"}</Button>
                 </Box>
               </DialogContent>
               {currentDate &&

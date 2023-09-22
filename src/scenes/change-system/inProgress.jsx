@@ -5,8 +5,9 @@ import { DataGrid } from "@mui/x-data-grid";
 import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
 import ChangeSheet from "./changeSheet";
-
-export default function Inprogress({listData=[]}){
+import ArrowRightAltSharpIcon from '@mui/icons-material/ArrowRightAltSharp';
+import EditIcon from '@mui/icons-material/Edit';
+export default function Inprogress({listData=[],setListData}){
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isMobile = useMediaQuery('(max-width:1000px)'); // 媒体查询判断是否为手机屏幕
@@ -14,18 +15,18 @@ export default function Inprogress({listData=[]}){
         {
             field: "c_name",
             headerName: "課堂名稱",
-            flex: isMobile ? 0.7 : 1,
+            flex: 0.7 ,
             cellClassName: "name-column--cell",
         },
         {
             field: "keyindate",
             headerName: "申請日期",
-            flex: 1,
+            flex: isMobile?1:0.4,
         },
         {
             field: "change_type",
             headerName: "事由",
-            flex: isMobile ? 0.3 : 1,
+            flex:  0.3 ,
             renderCell: (rows) => {
                 return (
                     <Box display={"flex"} flexWrap={"wrap"} gap={"12px"} width="100%" >
@@ -37,13 +38,54 @@ export default function Inprogress({listData=[]}){
             }
         },
         {
+            field: "process",
+            headerName: "簽核狀態",
+            flex:1.5,
+            hide:isMobile,
+            renderCell: (rows) => {
+             
+                return (
+                    <Box display={"flex"} gap={"16px"} width="100%" >
+                        {rows.row.process.map((item,i)=>{
+                               
+                            return(
+                                <Box display={"flex"} alignItems={"center"} gap={"4px"} sx={{
+                                    width:"fit-content",
+                                    padding:"5px 10px",
+                                    backgroundColor:item.record_type === "100" ? "#ccc" : rows.row.process[i-1]?.record_type === "100" ? "#6060d1":i==0?"#6060d1":"transparent",
+                                    borderRadius:"10px",
+                                    boxShadow:rows.row.process[i-1]?.record_type === "100" ? "0 0 5px 1px #9a9a9a":i==0?"0 0 5px 1px #9a9a9a":"none",
+                                    border:rows.row.process[i-1]?.record_type === "100" ? "none":i==0?"none":"1px solid #9a9a9a",
+                                    "& p":{
+                                        margin:0,
+                                        color:item.record_type === "100" ? "#000":rows.row.process[i-1]?.record_type === "100" ? "#fff":i==0?"#fff":"#8a8a8a",
+                                    }
+                                }}>
+                                    <p >{item.name}</p>
+                                    {item.record_type === "100" ? 
+                                        <>
+                                          <p>: {item?.record_type === "100".split(" ")[0]}</p>
+                                            <ArrowRightAltSharpIcon/>
+                                        </>
+                                        :
+                                        rows.row.process[i-1]?.record_type === "100" ?  <EditIcon sx={{width:"15px",height:"15px",fill:"#fff"}}/>:i==0  ?  <EditIcon sx={{width:"15px",height:"15px",fill:"#fff"}}/>:""
+                                     
+                                    }
+                                </Box>
+                            )
+                        })}
+                    </Box>
+                )
+            }
+        },
+        {
             field: "modify",
             headerName: "檢視",
             flex: isMobile ? 0.7 : 1,
             renderCell: (rows) => {
                 return (
                     <Box display={"flex"} flexWrap={"wrap"} gap={"12px"} width="100%" >
-                        <ChangeSheet data={rows.row} crud={"view"} sheetId={rows.row.Tb_index}/>
+                        <ChangeSheet data={rows.row} crud={"view"} sheetId={rows.row.Tb_index} setListData={setListData}/>
                     </Box>
                 )
             }

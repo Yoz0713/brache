@@ -16,6 +16,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import ClassTemplate from './classTemplate';
+import useAuthorityRange from '../../custom-hook/useAuthorityRange';
 function CrudTemplateData({ id, type, sx, handleButtonClick }) {
     const [open, setOpen] = useState(false);
     const [templateListData, setTemplateListData] = useState({
@@ -194,7 +195,7 @@ function CrudTemplateData({ id, type, sx, handleButtonClick }) {
     );
 }
 
-function TemplateReNew({ id }) {
+function TemplateReNew({ id}) {
     const [open, setOpen] = useState(false);
     const isMobile = useMediaQuery('(max-width:1000px)'); // 媒体查询判断是否为手机屏幕
 
@@ -236,7 +237,7 @@ function TemplateReNew({ id }) {
 }
 
 
-function TemplateList({ templateData, setTemplateData, handleButtonClick }) {
+function TemplateList({ templateData, setTemplateData, handleButtonClick,authorityRange }) {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const dispatch = useDispatch(null)
@@ -291,36 +292,41 @@ function TemplateList({ templateData, setTemplateData, handleButtonClick }) {
                 return (
                     <Box display={"flex"} flexWrap={"wrap"} gap={"12px"} width="100%" flexDirection={isMobile ? "column" : "row"}>
                         {/* {authorityRange.p_update && <UpdatedTeacherData id={rows.row.Tb_index}  sx={{ width: "66px" }} />} */}
-                        <TemplateReNew id={rows.row.Tb_index} />
-                        <CrudTemplateData id={rows.row.Tb_index} sx={{ width: "66px" }} type={"update"} handleButtonClick={handleButtonClick} />
-                        <Box
-                            width="fit-content"
-                            p="6px"
-                            display="flex"
-                            borderRadius="4px"
-                            backgroundColor="#F8AC59"
-                            justifyContent="center"
-                            alignItems="center"
-                            sx={{ cursor: "pointer" }}
-                            onClick={() => {
-                                if (window.confirm(`確定要刪除使用者:"${rows.row.ct_title}"嗎?`)) {
-                                    templateApi.delete_course_list(rows.row.Tb_index, (data) => {
-                                        if (data.data.success) {
-                                            handleButtonClick()
-                                            dispatch(snackBarOpenAction(true, `${data.data.msg}-${rows.row.ct_title}`))
-                                        } else {
-                                            dispatch(snackBarOpenAction(true, `${data.data.msg}-${rows.row.ct_title}`, "error"))
-                                        }
-                                    })
-                                }
-                            }}
-                        >
-                            <DeleteIcon sx={{ color: "#fff" }} />
-                            <Typography color={"#fff"} sx={{ ml: "5px" }}>
-                                刪除
-                            </Typography>
+                        <TemplateReNew id={rows.row.Tb_index}/>
+                        {authorityRange.p_update &&
+                           <CrudTemplateData id={rows.row.Tb_index} sx={{ width: "66px" }} type={"update"} handleButtonClick={handleButtonClick} />
+                        }
+                        {authorityRange.p_delete &&
+                          <Box
+                          width="fit-content"
+                          p="6px"
+                          display="flex"
+                          borderRadius="4px"
+                          backgroundColor="#F8AC59"
+                          justifyContent="center"
+                          alignItems="center"
+                          sx={{ cursor: "pointer" }}
+                          onClick={() => {
+                              if (window.confirm(`確定要刪除使用者:"${rows.row.ct_title}"嗎?`)) {
+                                  templateApi.delete_course_list(rows.row.Tb_index, (data) => {
+                                      if (data.data.success) {
+                                          handleButtonClick()
+                                          dispatch(snackBarOpenAction(true, `${data.data.msg}-${rows.row.ct_title}`))
+                                      } else {
+                                          dispatch(snackBarOpenAction(true, `${data.data.msg}-${rows.row.ct_title}`, "error"))
+                                      }
+                                  })
+                              }
+                          }}
+                      >
+                          <DeleteIcon sx={{ color: "#fff" }} />
+                          <Typography color={"#fff"} sx={{ ml: "5px" }}>
+                              刪除
+                          </Typography>
 
-                        </Box>
+                      </Box>
+                        }
+                      
                     </Box>
                 )
             }
@@ -389,11 +395,29 @@ export default function Template() {
             setTemplateData(res.data)
         })
     };
+
+       //權限
+   const { accessData, accessDetect } = useAuthorityRange()
+   const [authorityRange, setAuthorityRange] = useState({})
+ 
+   //獲取權限範圍
+   useEffect(() => {
+       if (accessData) {
+           const result = accessDetect(accessData, "公版課表")
+           setAuthorityRange({
+               p_delete: result.p_delete === "1" ? true : false,
+               p_insert: result.p_insert === "1" ? true : false,
+               p_update: result.p_update === "1" ? true : false,
+           })
+       }
+   }, [accessData])
+
     return (
         <div style={{ width: '95%', margin: '20px auto 0', display: "flex", flexDirection: "column" }}>
             <Header title="課表模板" subtitle="以週為單位新增課表模板，模板可以用來匯入至正式課表做初步排課。" />
-            <CrudTemplateData type={"insert"} sx={{ alignSelf: "flex-end" }} handleButtonClick={handleButtonClick} />
-            <TemplateList templateData={templateData} setTemplateData={setTemplateData} handleButtonClick={handleButtonClick} />
+            {authorityRange.p_insert && <CrudTemplateData type={"insert"} sx={{ alignSelf: "flex-end" }} handleButtonClick={handleButtonClick} />}
+          
+            <TemplateList templateData={templateData} setTemplateData={setTemplateData} handleButtonClick={handleButtonClick} authorityRange={authorityRange}/>
         </div>
     );
 }

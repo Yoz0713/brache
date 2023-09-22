@@ -13,6 +13,7 @@ import * as singInSheetApi from "../../axios-api/siginSheetData"
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import { snackBarOpenAction } from '../../redux/action';
+import useAuthorityRange from '../../custom-hook/useAuthorityRange';
 
 function SignInList() {
 
@@ -27,6 +28,20 @@ function SignInList() {
     const [listData, setListData] = useState(null)
 
     const isMobile = useMediaQuery('(max-width:1000px)'); // 媒体查询判断是否为手机屏幕
+    //獲取權限資料
+    const { accessData, accessDetect } = useAuthorityRange()
+    const [authorityRange, setAuthorityRange] = useState({})
+
+    useEffect(() => {
+        if (accessData) {
+            const result = accessDetect(accessData, "簽到表登記")
+            setAuthorityRange({
+                p_delete: result.p_delete === "1" ? true : false,
+                p_insert: result.p_insert === "1" ? true : false,
+                p_update: result.p_update === "1" ? true : false,
+            })
+        }
+    }, [accessData])
 
     const columns = [
         {
@@ -78,7 +93,8 @@ function SignInList() {
                         <OpenScanner listData={rows.row} />
                     </Box>
                 )
-            }
+            },
+            hide:!authorityRange.p_insert
         },
     ];
 
@@ -206,18 +222,6 @@ const OpenScanner = ({ listData }) => {
                 return (
                     <Box display={"flex"} flexWrap={"wrap"} gap={"12px"} width="100%" >
                         {rows.row.signin_time && <CheckCircleOutlineIcon sx={{ color: "green" }} />}
-                    </Box>
-                )
-            }
-        },
-        {
-            field: "signout_time",
-            headerName: "簽退",
-            flex: 1,
-            renderCell: (rows) => {
-                return (
-                    <Box display={"flex"} flexWrap={"wrap"} gap={"12px"} width="100%" >
-                        {rows.row.signout_time && <CheckCircleOutlineIcon sx={{ color: "green" }} />}
                     </Box>
                 )
             }

@@ -1,61 +1,73 @@
-import { Box, Typography, useMediaQuery } from "@mui/material";
+import { Box, Button, Typography, useMediaQuery } from "@mui/material";
 import React from "react";
 import { IsLoading } from "../../components/loading";
 import { DataGrid } from "@mui/x-data-grid";
 import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
-
-export default function Storage({listData=[]}){
+import ChangeSheet from "./changeSheet";
+import DeleteIcon from '@mui/icons-material/Delete';
+import { delete_course_transfer,get_course_transfer } from "../../axios-api/changeSystem";
+import { useDispatch, useSelector } from "react-redux";
+import { snackBarOpenAction } from "../../redux/action";
+export default function Storage({listData=[],setListData}){
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isMobile = useMediaQuery('(max-width:1000px)'); // 媒体查询判断是否为手机屏幕
+     //獲取使用者資訊
+     const userData = useSelector(state => state.accessRangeReducer)
+
+    const dispatch = useDispatch(null)
+
     const columns = [
-        {
-            field: 'id',
-            headerName: '#',
-            width: 50,
-            filterable: false,
-            renderCell: (params) => {
-                return <div>{params.row.index + 1}</div>;
-            },
-            hide: isMobile
-        },
         {
             field: "c_name",
             headerName: "課堂名稱",
-            flex: isMobile ? 0.5 : 1,
+            flex: isMobile ? 0.7 : 1,
             cellClassName: "name-column--cell",
         },
         {
-            field: "teacher_name",
-            headerName: "老師",
+            field: "keyindate",
+            headerName: "申請日期",
             flex: 1,
-            hide: isMobile
         },
         {
-            field: "room_name",
-            headerName: "教室",
+            field: "change_type",
+            headerName: "事由",
             flex: isMobile ? 0.3 : 1,
-        },
-        {
-            field: "class-time",
-            headerName: "上課時間",
-            flex: isMobile ? 0.5 : 1,
             renderCell: (rows) => {
                 return (
                     <Box display={"flex"} flexWrap={"wrap"} gap={"12px"} width="100%" >
-                        <p>{rows.row.StartTime}~{rows.row.EndTime}</p>
+                        {rows.row.change_type === "1" && <p>調課</p>}
+                        {rows.row.change_type === "2" && <p>換課</p>}
+                        {rows.row.change_type === "3" && <p>補簽</p>}
                     </Box>
                 )
             }
         },
         {
             field: "modify",
-            headerName: "登記",
+            headerName: "簽核",
             flex: isMobile ? 0.7 : 1,
             renderCell: (rows) => {
+                
                 return (
                     <Box display={"flex"} flexWrap={"wrap"} gap={"12px"} width="100%" >
+                        <ChangeSheet data={rows.row} crud={"storage"} sheetId={rows.row.Tb_index} setListData={setListData}/>
+                        <Button variant="contained" sx={{ backgroundColor: "#F8AC59", width: "85px", gap: "5px" }} onClick={(e) => {
+                               const userId = userData.inform.Tb_index;
+                               if(window.confirm("確定要刪除此異動單?")){
+                                delete_course_transfer(rows.row.Tb_index,(res)=>{
+                                    if(res.data.success){
+                                        dispatch(snackBarOpenAction(true, `${res.data.msg}`))
+                                        get_course_transfer(userId,(res)=>{
+                                            setListData(res.data.data)
+                                    })}
+                                })
+                               }
+                        }}>
+                            <DeleteIcon sx={{ color: "#fff" }} />
+                            刪除
+                        </Button>
                     </Box>
                 )
             }
@@ -105,7 +117,7 @@ export default function Storage({listData=[]}){
                 }
             }}
         >
-            {listData ? <DataGrid rowHeight={isMobile ? 110 : 85} rows={listData} getRowId={(row) => row.index} columns={columns} /> : <IsLoading />}
+            {listData ? <DataGrid rowHeight={isMobile ? 95 : 85} rows={listData} getRowId={(row) => row.Tb_index} columns={columns} /> : <IsLoading />}
         </Box>
         </Box>
     )

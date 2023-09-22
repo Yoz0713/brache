@@ -205,15 +205,14 @@ function List({ listData }) {
                                     }}>
                                         <Box className="date">
                                             <p>{date}</p>
-                                            <Box display={"flex"} width={"100%"} sx={{
+                                            <Box display={"flex"} justifyContent={"center"} width={"100%"} sx={{
                                                 margin: "3px 0",
                                                 "& p": {
                                                     width: "50%",
                                                     textAlign: "center",
                                                 }
                                             }}>
-                                                <p>上課</p>
-                                                <p>下課</p>
+                                                <p>簽到</p>
                                             </Box>
                                         </Box>
                                         <Box sx={{
@@ -238,20 +237,14 @@ function List({ listData }) {
                                                 }
                                             }
                                         }}>
-                                            <Box className="checkIn" display={"flex"} gap={"10px"} >
+                                            <Box className="checkIn" display={"flex"} gap={"10px"} justifyContent={"center"} >
                                                 <Box>
                                                     {item.t_signin_time ? <div className="round"></div> : <div className="x"></div>}
                                                 </Box>
-                                                <Box>
-                                                    {item.t_signout_time ? <div className="round"></div> : <div className="x"></div>}
-                                                </Box>
                                             </Box>
-                                            <Box className="checkOut" display={"flex"} gap={"10px"} >
+                                            <Box className="checkOut" display={"flex"} gap={"10px"} justifyContent={"center"} >
                                                 <Box>
                                                     {item.s_signin_time ? <div className="round"></div> : <div className="x"></div>}
-                                                </Box>
-                                                <Box>
-                                                    {item.s_signout_time ? <div className="round"></div> : <div className="x"></div>}
                                                 </Box>
                                             </Box>
                                         </Box>
